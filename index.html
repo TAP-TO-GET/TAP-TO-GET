@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tap to Collect Coins</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{
+      margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#0f2027,#203a43);color:#fff;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;
+    }
+    .card{width:100%;max-width:720px;padding:26px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(0,0,0,0.06));box-shadow:0 8px 30px rgba(0,0,0,0.4);text-align:center}
+    h1{margin:0 0 18px;font-size:28px}
+    #tapBtn{background:linear-gradient(#ffd94d,#ffb84d);color:#111;border:0;padding:22px 44px;border-radius:12px;font-size:22px;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,0.35)}
+    #tapBtn:active{transform:scale(.98)}
+    .stats{margin-top:18px;background:rgba(0,0,0,0.12);padding:14px;border-radius:10px;font-size:18px}
+    .stats p{margin:8px 0}
+    .small{font-size:13px;color:rgba(255,255,255,0.7)}
+    .controls{margin-top:12px;display:flex;gap:8px;justify-content:center}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Tap Coin Collector 🪙</h1>
+    <button id="tapBtn">👉 TAP ME 👈</button>
+
+    <div class="stats" aria-live="polite">
+      <p>Total Taps: <strong id="taps">0</strong></p>
+      <p>Gold Coins 🟡: <strong id="gold">0</strong></p>
+      <p>Blue Coins 🔵: <strong id="blue">0</strong></p>
+      <p class="small">1000 taps = 1 Gold. 5 Gold = 1 Blue (equivalent 5000 taps).</p>
+    </div>
+
+    <div class="controls">
+      <button id="resetBtn" class="btn-ghost">Reset Progress</button>
+    </div>
+  </div>
+
+<script>
+/* Hard-coded rules:
+   1000 taps => 1 gold
+   5000 taps => 1 blue  (also counts as 5 gold)
+   Progress saved in localStorage
+*/
+const goldThreshold = 1000;
+const blueThreshold = 5000;
+
+let taps = parseInt(localStorage.getItem('taps')) || 0;
+let gold = parseInt(localStorage.getItem('gold')) || 0;
+let blue = parseInt(localStorage.getItem('blue')) || 0;
+
+const tapsEl = document.getElementById('taps');
+const goldEl = document.getElementById('gold');
+const blueEl = document.getElementById('blue');
+const tapBtn = document.getElementById('tapBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+function updateUI(){
+  tapsEl.textContent = taps;
+  goldEl.textContent = gold;
+  blueEl.textContent = blue;
+}
+
+function save(){
+  localStorage.setItem('taps', String(taps));
+  localStorage.setItem('gold', String(gold));
+  localStorage.setItem('blue', String(blue));
+}
+
+tapBtn.addEventListener('click', () => {
+  taps++;
+  // convert to gold every 1000 taps
+  while(taps >= goldThreshold){
+    taps -= goldThreshold;
+    gold++;
+  }
+  // convert 5 gold -> 1 blue automatically
+  while(gold >= 5){
+    gold -= 5;
+    blue++;
+  }
+
+  updateUI();
+  save();
+});
+
+// reset
+resetBtn.addEventListener('click', ()=>{
+  if(!confirm('Reset all progress?')) return;
+  taps = 0; gold = 0; blue = 0;
+  updateUI(); save();
+});
+
+// show initial
+updateUI();
+</script>
+</body>
+</html>
